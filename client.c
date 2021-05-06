@@ -19,13 +19,28 @@ void options(){
 	 //"\t-v or --verbose\t\t\tgive verbose output\n"
 	 );
 }
+void optionsPost(char *message){
+	char title[50], abstract[200], gender[50], cast[100], stat[]="Disponivel";
+	printf(
+	 "\t-- Preenchimento de dados do Filme --\n"
+	 "\tTitulo do filme\n--> ");
+	scanf(" %99[^\n]", title);
+	puts("\n\tResumo do filme\n--> ");
+	scanf(" %99[^\n]", abstract);
+	puts("\n\tGenero(s) do filme\n--> ");
+	scanf(" %99[^\n]", gender);
+	puts("\n\tElenco do filme\n--> ");
+	scanf(" %99[^\n]", cast);
+
+	sprintf(message, "POST /3 / %s/ %s/ %s/ %s/ %s", title, abstract, gender, cast, stat);
+}
 
 void optionSearch(char *id){
 	
 	printf(
 	 "\t Pesquisa por ID\n"
 	 "\t Digite o ID do filme\n"
-	 );
+	 "--> ");
 	scanf("%s", id);
 }
 
@@ -33,7 +48,7 @@ int main(int argc , char *argv[])
 {
 	int sock;
 	struct sockaddr_in server;
-	char message[TAM] , server_reply[TAM];
+	char message[TAM] , server_reply[TAM], aux[10];
 	
 	//Create socket
 	sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -58,44 +73,33 @@ int main(int argc , char *argv[])
 	puts("Connected\n");
 	
 	//keep communicating with server
-	while(1)
-	{ 
+	while(1){ 
+		init:
 		options();
 		printf("\nOpção: ");
 		scanf("%s" , message);
 		int opt = atoi(message);
-
-		memset(server_reply, 0, TAM);
-		if ((opt > 0) && (opt < 5)){
-			if( send(sock , message , strlen(message) , 0) < 0)
-			{
-				puts("Falha ao comunicar com servidor");
-				return 1;
-			}
-		}
-
+		
+		printf("\nOP: %d\n", opt);
+		memset(message, 0, sizeof(message));
+		
 		switch (opt){
 		case 1:
+			sprintf(message, "GET /%d /aloou", opt);
 			break;
 
 		case 2:
-			optionSearch(message);
-
-			/* if( send(sock , message , strlen(message) , 0) < 0)
-			{
-				puts("Falha ao comunicar com servidor");
-				return 1;
-			}
-			memset(server_reply, 0, TAM);
-			 */
+			optionSearch(aux);
+			sprintf(message, "GET /%d /%s", opt, aux);
 			break;
 		
 		case 3:
-			/* code */
+			optionsPost(message);
 			break;
 		
 		case 4:
-			/* code */
+			puts("Ainda no implementado!\n");
+			// PUT /...
 			break;
 		
 		case 5:
@@ -103,9 +107,16 @@ int main(int argc , char *argv[])
 		
 		default:
 			puts("Opção inválida!");
-			break;
+			goto init;
 		}
 
+		printf("\nmessage: %s\n\n", message);
+		if( send(sock , message , strlen(message) , 0) < 0){
+			puts("Falha ao comunicar com servidor");
+			return 1;
+		}
+			
+		memset(server_reply, 0, TAM);
 		//Receive a reply from the server
 		if( recv(sock , server_reply , TAM , 0) < 0){
 			puts("Falha ao receber do servidor");

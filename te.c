@@ -1,31 +1,23 @@
 #include <stdio.h>
 #include <string.h>
 
-void teste(char *aa){
-	char oi[]= "fogo no parkin";
-	int i=0;
-	memset(aa, 0, 200);
+int main(){
+	const char t[] = "/";
 
-	while (i<2){
-		sprintf(aa, "%s%d teste logo\n%s\n", aa, 3, oi);
+	char *ai[6];
+	char frase[] = "meu / vix eu / to / 4/ final";
+	int i=0;
+	char *token = strtok(frase, t);
+
+	while(token != NULL){
+		ai[i] = token;
+		//printf("-> %s\n", token);
+		token = strtok(NULL, t);
 		i++;
 	}
-	printf("1\n");
-}
 
-void pa(char *buf){
-	char Buf[200];
-
-	teste(Buf);
-	*buf = Buf;
-	printf("2\n");
-}
-
-int main(){
-	char *buf;
-
-	pa(buf);
-	printf("3\n%s\n", buf);
+	printf("1 - %s\n", ai[0]);
+	printf("3 - %s\n", ai[2]);
 
 	return 0;
 }

@@ -88,7 +88,7 @@ void *connection_handler(void *socket_desc)
 	//Get the socket descriptor
 	int sock = *(int*)socket_desc;
 	int read_size;
-	char message[TAM], *aux, client_message[TAM];
+	char message[TAM], *aux, client_message[TAM], textXml[TAM];
 	char name[] = "locadora.xml";
 
 	//Send some messages to the client
@@ -101,8 +101,22 @@ void *connection_handler(void *socket_desc)
 		strcpy(message, "=)");
 		puts("aguardando\n");
 		printf("%s\n", client_message);
-		switch (atoi(client_message))
-		{
+		const char del[]= "/";
+		
+		int typeT, i, tamanho = strlen(client_message);
+		char *token;
+		char *preenche[10];
+
+		i = 0;
+		token = strtok(client_message, del);
+
+		while(token != NULL){
+			preenche[i] = token;
+			token = strtok(NULL, del);
+			i++;
+		}
+
+		switch (atoi(preenche[1])){
 		case 1:
 			readFile(name, message);
 			printf("listado\n");
@@ -110,25 +124,25 @@ void *connection_handler(void *socket_desc)
 		
 		case 2:
 			//write(sock , "Ok" , strlen("Ok"));
-			if ((read_size = recv(sock , client_message , TAM , 0)) > 0){
-				findFile(name, client_message, message);
-				puts("pesquisado\n");
-			}
-			else
-				goto finish;
-			
+			findFile(name, preenche[2], message);
+			puts("pesquisado\n");
 			break;
 		
 		case 3:
+		    toInsertFile(name, preenche[2], preenche[3], preenche[4], preenche[5], preenche[6], textXml);
+			printf("--------------------------------------------\n");
+			insertEndFile(name, textXml);
 			break;
 		
 		default:
 			break;
 		}
+
 		//Send the message back to client
-		//printf("entro aq\n");
 		write(sock , message , strlen(message));
 		memset(message, 0, TAM);
+		memset(client_message, 0, TAM);
+		memset(preenche, 0, sizeof(preenche));
 	}
 	
 	if(read_size == 0)
@@ -146,28 +160,4 @@ void *connection_handler(void *socket_desc)
 		free(socket_desc);
 	
 	return 0;
-}
-
-void requiredOption(char option[], char *message){
-	//char text[TAM];
-
-	switch (atoi(option))
-	{
-	case 1:
-		readFile("locadora.xml", message);
-		
-		printf("option\n%s", message);
-		break;
-	
-	case 2:
-		
-		break;
-	
-	case 3:
-		
-		break;
-	
-	default:
-		break;
-	}
 }
