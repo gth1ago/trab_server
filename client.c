@@ -1,28 +1,35 @@
-/*
-	C ECHO client example using sockets
-*/
 #include <stdio.h>	//printf
 #include <stdlib.h>	// atoi
 #include <string.h>	// strlen
 #include <sys/socket.h>	//socket
 #include <arpa/inet.h>	//inet_addr
 #include <unistd.h>
+
+#if defined(__linux) || defined(__linux__)
+#define limparTela() system("clear")
+#else
+#define limparTela() system("cls")
+#endif
+
 #define TAM 10000
+
+
 
 void options(){
 	printf(
-	 "\t1 Visualizar lista de filmes\n"
-	 "\t2 Pesquisar filme por ID\n"
-	 "\t3 Inserir novo filme\n"
-	 "\t4 Alugar filme\n"
-	 "\t5 Sair\n"
+	 "\t ______________MENU______________\n"
+	 "\t| 1 Visualizar lista de filmes\t|\n" 
+	 "\t| 2 Pesquisar filme por ID\t|\n"
+	 "\t| 3 Inserir novo filme\t\t|\n"
+	 "\t| 4 Alugar filme\t\t|\n"
+	 "\t| 5 Sair\t\t\t|\n"
 	 //"\t-v or --verbose\t\t\tgive verbose output\n"
 	 );
 }
 void optionsPost(char *message){
 	char title[50], abstract[200], gender[50], cast[100], stat[]="Disponivel";
 	printf(
-	 "\t-- Preenchimento de dados do Filme --\n"
+	 "\tt_Preenchimento de dados do Filme_  --\n"
 	 "\tTitulo do filme\n--> ");
 	scanf(" %99[^\n]", title);
 	puts("\n\tResumo do filme\n--> ");
@@ -31,16 +38,14 @@ void optionsPost(char *message){
 	scanf(" %99[^\n]", gender);
 	puts("\n\tElenco do filme\n--> ");
 	scanf(" %99[^\n]", cast);
-
 	sprintf(message, "POST /3 / %s/ %s/ %s/ %s/ %s", title, abstract, gender, cast, stat);
 }
 
 void optionSearch(char *id){
 	
 	printf(
-	 "\t Pesquisa por ID\n"
-	 "\t Digite o ID do filme\n"
-	 "--> ");
+	 "\n________________Pesquisa por ID_________________\n\n"
+	 "Digite o ID do filme => ");
 	scanf("%s", id);
 }
 
@@ -76,7 +81,7 @@ int main(int argc , char *argv[])
 	while(1){ 
 		init:
 		options();
-		printf("\nOpção: ");
+		printf("\nOpção => ");
 		scanf("%s" , message);
 		int opt = atoi(message);
 		
@@ -89,11 +94,13 @@ int main(int argc , char *argv[])
 			break;
 
 		case 2:
+			limparTela();
 			optionSearch(aux);
 			sprintf(message, "GET /%d /%s", opt, aux);
 			break;
 		
 		case 3:
+			limparTela();
 			optionsPost(message);
 			break;
 		
@@ -122,8 +129,10 @@ int main(int argc , char *argv[])
 			puts("Falha ao receber do servidor");
 			break;
 		}
+		limparTela();
 		puts("Server reply: ");
 		puts(server_reply);
+		puts("________________________________________________________________\n");
 
 	}
 	

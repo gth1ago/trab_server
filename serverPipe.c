@@ -6,13 +6,18 @@
 #include<unistd.h>	//write
 #include<pthread.h> //for threading , link with lpthread
 #include "testeXML.c"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#define MSGSIZE 16
 
 // voce pode usar para extrair as informações a 
 // biblioteca libxml(http://www.xmlsoft.org/index.html) 
 
 //the thread function
-void *connection_handler(void *);
+void *connection_handler(void *socket_desc);
 void requiredOption();
+const char *searchPipe(char name[], char *preenche);
 
 int main(int argc , char *argv[])
 {
@@ -85,23 +90,30 @@ int main(int argc , char *argv[])
  * */
 void *connection_handler(void *socket_desc)
 {
+    char inbuf[MSGSIZE];
+
 	//Get the socket descriptor
 	int sock = *(int*)socket_desc, read_size;
-	char message[TAM], *aux, client_message[TAM], textXml[TAM], name[] = "locadora.xml";
+	char message[TAM], client_message[TAM], textXml[TAM], name[] = "locadora.xml";
 
 	//Receive a message from client
 	while( (read_size = recv(sock , client_message , TAM , 0)) > 0 )
 	{ 
-		strcpy(message, "=)");
-		puts("aguardando\n");
+		int fd[2];
+		int iPid;
+		if(pipe(fd)<0) {
+			perror("pipe") ;
+			exit(1) ;
+		}
+
+		strcpy(message, " ");
+		puts("Aguardando\n");
 		printf("%s\n", client_message);
 		const char del[]= "/";
 		
-		int typeT, i, tamanho = strlen(client_message);
-		char *token;
-		char *preenche[10];
+		int typeT, i = 0, tamanho = strlen(client_message), n;
+		char *token, *preenche[10];
 
-		i = 0;
 		token = strtok(client_message, del);
 
 		while(token != NULL){
@@ -113,15 +125,43 @@ void *connection_handler(void *socket_desc)
 		switch (atoi(preenche[1])){
 		case 1:
 			readFile(name, message);
-			printf("listado\n");
+			printf("Listado\n");
 			break;
-		
-		case 2:
-			//write(sock , "Ok" , strlen("Ok"));
-			findFile(name, preenche[2], message);
-			puts("pesquisado\n");
-			break;
-		
+		case 2:	
+            iPid = fork();
+        	char line[TAM];
+
+            if (iPid < 0){
+                puts("Error fork iPid!");
+                exit(1);
+            }
+			// filho
+            if (iPid == 0){
+				printf("filho: %d\n", getppid());
+				char buf[TAM];
+        		char *hello;
+				findFile(name, preenche[2], buf);
+				hello = buf;
+				/* Operação obrigatória: fechar o descritor
+				* desnecessário. */
+				close(fd[0]) ;
+
+				/* Escreve a mensagem no pipe. */
+				write(fd[1], hello, strlen(hello)+1) ;
+
+				close(fd[1]);
+				sleep(1);
+				kill(getpid(), SIGKILL);
+            }
+            else{
+                //wait(NULL);
+				printf("pai: %d\n", getppid());
+                close(fd[1]); // fecha o lado emissor do pipe
+                read(fd[0], message, sizeof message);
+                close(fd[0]);
+            }
+			puts("Pesquisado");
+            break;
 		case 3:
 		    toInsertFile(name, preenche[2], preenche[3], preenche[4], preenche[5], preenche[6], textXml);
 			printf("--------------------------------------------\n");
@@ -140,7 +180,7 @@ void *connection_handler(void *socket_desc)
 	}
 	
 	if(read_size == 0)
-	{
+	{	
 		puts("Client disconnected");
 		fflush(stdout);
 	}
@@ -153,4 +193,53 @@ void *connection_handler(void *socket_desc)
 	free(socket_desc);
 	
 	return 0;
+}
+
+const char *searchPipe(char name[], char pesquisa[]){
+    char msg[TAM] ;
+    int fd[2] ;
+    int pid ;
+
+    /* Cria um pipe. */
+    if(pipe(fd)<0) {
+        perror("pipe") ;
+       exit(1) ;
+    }
+
+    /* Cria processo filho. */
+    pid = fork() ;
+
+    if(pid == -1) {
+        perror("fork") ;
+        exit(1) ;
+    }
+
+    /* Processo filho. */
+    if(pid) {
+		char buf[TAM];
+        char *hello;
+		findFile(name, pesquisa, buf);
+		hello = buf;
+        /* Operação obrigatória: fechar o descritor
+         * desnecessário. */
+        close(fd[0]) ;
+
+        /* Escreve a mensagem no pipe. */
+        write(fd[1], hello, strlen(hello)+1) ;
+
+        close(fd[1]) ;
+		sleep(2);
+    } else { /* Processo pai. */
+        /* Operação obrigatória: fechar o descritor
+         * desnecessário. */
+        close(fd[1]) ;
+
+        /* Lê a mensagem do pipe. */
+        read(fd[0], msg, sizeof msg) ;
+
+        printf("Mensagem recebida: %s\n", msg) ;
+
+        close(fd[0]) ;
+    }
+	return "oie";
 }

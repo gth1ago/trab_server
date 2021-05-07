@@ -37,4 +37,5 @@
 	<filme id="17"><titulo>Mayler e Eu</titulo><resumo>O filme mostra a elegância da XML na representação de dados estruturados e semi estruturados.</resumo><genero>Comédia/Drama</genero><elenco>Maryley; Eu</elenco><status>Disponivel</status></filme>
 	<filme id="18"><titulo>Flash</titulo><resumo>Filme americano com base no personagem homônimo da DC Comics</resumo><genero>Aventura</genero><elenco>Graant Gustin; Candice Patton</elenco><status>Disponivel</status></filme>
 	<filme id="19"><titulo> Pe de feijao</titulo><resumo> Um menino que sobre num pe de feijao e fica top</resumo><genero> Ação</genero><elenco> Joao</elenco><status> Disponivel</status></filme>
+	<filme id="20"><titulo> 007</titulo><resumo> loucura no aviao e muito tiro</resumo><genero> Ação</genero><elenco> james bond</elenco><status> Disponivel</status></filme>
 </locadora>
