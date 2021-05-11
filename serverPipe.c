@@ -5,25 +5,30 @@
 #include<arpa/inet.h>	//inet_addr
 #include<unistd.h>	//write
 #include<pthread.h> //for threading , link with lpthread
+#include <semaphore.h>
 #include "functionsXML.c"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
 #define MSGSIZE 16
 
-// voce pode usar para extrair as informações a 
-// biblioteca libxml(http://www.xmlsoft.org/index.html) 
-
-//the thread function
 void *connection_handler(void *socket_desc);
 void requiredOption();
 const char *searchPipe(char name[], char *preenche);
 
+sem_t sem; 		// semafaro
+int shared;
+int value;
+
 int main(int argc , char *argv[])
 {
+	shared = 0;  // se 0 = nao pode compartilhar entre processo; se != 0 pode
+	value = 1;
+	sem_init(&sem, shared, value);
+
 	int socket_desc , client_sock , c , *new_sock;
 	struct sockaddr_in server , client;
-	
+
 	//Create socket
 	socket_desc = socket(AF_INET , SOCK_STREAM , 0);
 	if (socket_desc == -1)
@@ -123,11 +128,8 @@ void *connection_handler(void *socket_desc)
 		}
 
 		switch (atoi(preenche[1])){
-		case 1:
-			readFile(name, message);
-			printf("Listado\n");
-			break;
-		case 2:	
+		case 1: // uso do pipe
+			sem_wait(&sem);
             iPid = fork();
         	char line[TAM];
 
@@ -140,15 +142,14 @@ void *connection_handler(void *socket_desc)
 				printf("filho: %d\n", getppid());
 				char buf[TAM];
         		char *hello;
-				findFile(name, preenche[2], buf);
+				readFile(name, buf);
 				hello = buf;
-				/* Operação obrigatória: fechar o descritor
-				* desnecessário. */
+				// Operação obrigatória: fechar o descritor
 				close(fd[0]) ;
 
 				/* Escreve a mensagem no pipe. */
 				write(fd[1], hello, strlen(hello)+1) ;
-
+				sem_post(&sem);
 				close(fd[1]);
 				sleep(1);
 				kill(getpid(), SIGKILL);
@@ -160,8 +161,14 @@ void *connection_handler(void *socket_desc)
                 read(fd[0], message, sizeof message);
                 close(fd[0]);
             }
-			puts("Pesquisado");
+			puts("Listado");
             break;
+		case 2:	
+			//write(sock , "Ok" , strlen("Ok"));
+			findFile(name, preenche[2], message);
+			puts("Pesquisado\n");
+			break;
+
 		case 3:
 		    toInsertFile(name, preenche[2], preenche[3], preenche[4], preenche[5], preenche[6], textXml);
 			printf("--------------------------------------------\n");
