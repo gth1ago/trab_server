@@ -29,14 +29,14 @@ void options(){
 void optionsPost(char *message){
 	char title[50], abstract[200], gender[50], cast[100], stat[]="Disponivel";
 	printf(
-	 "\tt_Preenchimento de dados do Filme_  --\n"
-	 "\tTitulo do filme\n--> ");
+	 "\t_Preenchimento de dados do Filme_\n\n"
+	 "Titulo do filme\n--> ");
 	scanf(" %99[^\n]", title);
-	puts("\n\tResumo do filme\n--> ");
+	printf("\nResumo do filme\n--> ");
 	scanf(" %99[^\n]", abstract);
-	puts("\n\tGenero(s) do filme\n--> ");
+	printf("\nGenero(s) do filme\n--> ");
 	scanf(" %99[^\n]", gender);
-	puts("\n\tElenco do filme\n--> ");
+	printf("\nElenco do filme\n--> ");
 	scanf(" %99[^\n]", cast);
 	sprintf(message, "POST /3 / %s/ %s/ %s/ %s/ %s", title, abstract, gender, cast, stat);
 }
