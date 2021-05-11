@@ -5,7 +5,7 @@
 #include<arpa/inet.h>	//inet_addr
 #include<unistd.h>	//write
 #include<pthread.h> //for threading , link with lpthread
-#include "testeXML.c"
+#include "functionsXML.c"
 
 // voce pode usar para extrair as informações a 
 // biblioteca libxml(http://www.xmlsoft.org/index.html) 
