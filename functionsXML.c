@@ -6,6 +6,7 @@
 #define TAM 100000
 
 int insertEndFile(char name[], char new[]){
+    int verf = 0;
     FILE * fd= fopen(name, "r+b");
         
     if(fd == NULL){
@@ -14,11 +15,10 @@ int insertEndFile(char name[], char new[]){
     }
 
     fseek(fd, -11, SEEK_END);
-    fprintf(fd, "\t%s\n</locadora>", new);
-    printf("\nInserido!\n");
+    verf = fprintf(fd, "\t%s\n</streamings>", new);
     fclose(fd); 
     
-    return 0;
+    return verf;
 }
 
 int readFile(char *name, char *message){
@@ -118,7 +118,7 @@ int toInsertFile(char name[], char title[], char abstract[],
 }
 
 /* int main(){
-    char name[]= "locadora.xml";
+    char name[]= "streamings.xml";
     char *ID = "id";
     char texto[500];
 
