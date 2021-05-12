@@ -100,7 +100,7 @@ void *connection_handler(void *socket_desc)
 
 	//Get the socket descriptor
 	int sock = *(int*)socket_desc, read_size;
-	char message[TAM], client_message[TAM], textXml[TAM], line[TAM], name[] = "locadora.xml";
+	char message[TAM], client_message[TAM], textXml[TAM], line[TAM], name[] = "streaming.xml";
 	char *myfifo = "/tmp/myfifo";
 	
 	mkfifo(myfifo, 0666);

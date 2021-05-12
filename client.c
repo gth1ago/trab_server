@@ -23,7 +23,7 @@ void options(){
 	 "\t| 3 Inserir novo filme\t\t|\n"
 	 "\t| 4 Alugar filme\t\t|\n"
 	 "\t| 5 Sair\t\t\t|\n"
-	 //"\t-v or --verbose\t\t\tgive verbose output\n"
+	 "\t|_______________________________|\n"
 	 );
 }
 void optionsPost(char *message){
@@ -61,7 +61,6 @@ int main(int argc , char *argv[])
 	{
 		printf("Could not create socket");
 	}
-	puts("Socket created");
 	
 	server.sin_addr.s_addr = inet_addr("127.0.0.1");
 	server.sin_family = AF_INET;
@@ -75,8 +74,10 @@ int main(int argc , char *argv[])
 		return 1;
 	}
 	
-	puts("Connected\n");
-	
+	printf("\t _______________________________\n");
+	printf("\t|\t\t\t\t|\n");
+	printf("\t|\tSTEAMING MOVIES\t\t|\n");
+	printf("\t|_______________________________|\n\n");
 	//keep communicating with server
 	while(1){ 
 		init:
@@ -122,7 +123,7 @@ int main(int argc , char *argv[])
 			puts("Falha ao comunicar com servidor");
 			return 1;
 		}
-			
+
 		memset(server_reply, 0, TAM);
 		//Receive a reply from the server
 		if( recv(sock , server_reply , TAM , 0) < 0){
