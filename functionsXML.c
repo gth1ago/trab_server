@@ -25,7 +25,6 @@ int readFile(char *name, char *message){
     ezxml_t l1 = ezxml_parse_file(name), filme, titulo, resumo, genero, elenco, status;
     const char *filmename;
     memset(message, 0, TAM);
-    printf("read\n");
     for (filme = ezxml_child(l1, "filme"); filme; filme = filme->next) {
         filmename = ezxml_attr(filme, "id");
 

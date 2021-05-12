@@ -16,15 +16,17 @@ void *connection_handler(void *socket_desc);
 void requiredOption();
 const char *searchPipe(char name[], char *preenche);
 
-sem_t sem; 		// semafaro
+/*sem_t sem; 		// semafaro - nao sendo preciso por enquanto
 int shared;
-int value;
+int value; 
+*/
 
 int main(int argc , char *argv[])
 {
-	shared = 0;  // se 0 = nao pode compartilhar entre processo; se != 0 pode
+	/*shared = 0;  // se 0 = nao pode compartilhar entre processo; se != 0 pode
 	value = 1;
 	sem_init(&sem, shared, value);
+	*/
 
 	int socket_desc , client_sock , c , *new_sock;
 	struct sockaddr_in server , client;
@@ -35,7 +37,7 @@ int main(int argc , char *argv[])
 	{
 		printf("Could not create socket");
 	}
-	puts("Socket created");
+	puts("\nLogs:\n\nSocket created");
 	
 	//Prepare the sockaddr_in structure
 	server.sin_family = AF_INET;
@@ -45,7 +47,6 @@ int main(int argc , char *argv[])
 	//Bind
 	if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
 	{
-		//print the error message
 		perror("bind failed. Error");
 		return 1;
 	}
@@ -55,7 +56,7 @@ int main(int argc , char *argv[])
 	listen(socket_desc , 3);
 	
 	//Accept and incoming connection
-	puts("Waiting for incoming connections...");
+	puts("\nWaiting for incoming connections...\n");
 	c = sizeof(struct sockaddr_in);
 	
 	
@@ -99,13 +100,17 @@ void *connection_handler(void *socket_desc)
 
 	//Get the socket descriptor
 	int sock = *(int*)socket_desc, read_size;
-	char message[TAM], client_message[TAM], textXml[TAM], name[] = "locadora.xml";
+	char message[TAM], client_message[TAM], textXml[TAM], line[TAM], name[] = "locadora.xml";
+	char *myfifo = "/tmp/myfifo";
+	
+	mkfifo(myfifo, 0666);
 
 	//Receive a message from client
 	while( (read_size = recv(sock , client_message , TAM , 0)) > 0 )
 	{ 
-		int fd[2];
+		int fd[2], Fd1, Fd2;
 		int iPid;
+
 		if(pipe(fd)<0) {
 			perror("pipe") ;
 			exit(1) ;
@@ -121,7 +126,7 @@ void *connection_handler(void *socket_desc)
 
 		token = strtok(client_message, del);
 
-		while(token != NULL){
+		while(token != NULL){ 			// preenche entradas
 			preenche[i] = token;
 			token = strtok(NULL, del);
 			i++;
@@ -129,31 +134,31 @@ void *connection_handler(void *socket_desc)
 
 		switch (atoi(preenche[1])){
 		case 1: // uso do pipe
-			sem_wait(&sem);
+			//sem_wait(&sem);
             iPid = fork();
-        	char line[TAM];
+        	memset(line, 0, TAM);
 
             if (iPid < 0){
                 puts("Error fork iPid!");
                 exit(1);
             }
+
 			// filho
             if (iPid == 0){
 				printf("filho: %d\n", getppid());
 				char buf[TAM];
-        		char *hello;
+        		char *text;
 				readFile(name, buf);
-				hello = buf;
+				text = buf;
 				// Operação obrigatória: fechar o descritor
 				close(fd[0]) ;
 
 				/* Escreve a mensagem no pipe. */
-				write(fd[1], hello, strlen(hello)+1) ;
-				sem_post(&sem);
+				write(fd[1], text, strlen(text)+1) ;
 				close(fd[1]);
-				sleep(1);
 				kill(getpid(), SIGKILL);
             }
+			//pai
             else{
                 //wait(NULL);
 				printf("pai: %d\n", getppid());
@@ -161,11 +166,42 @@ void *connection_handler(void *socket_desc)
                 read(fd[0], message, sizeof message);
                 close(fd[0]);
             }
-			puts("Listado");
+			puts("Listado\n");
             break;
 		case 2:	
-			//write(sock , "Ok" , strlen("Ok"));
-			findFile(name, preenche[2], message);
+			iPid = fork();
+
+			if (iPid < 0){
+                puts("Error fork iPid!");
+                exit(1);
+            }
+			
+			// filho
+            if (iPid == 0){
+				char buf[TAM];
+				char *text;
+				printf("filho: %d\n", getppid());
+				findFile(name, preenche[2], buf);
+				text = buf;
+				puts(line);
+				if((Fd1 = open(myfifo, O_WRONLY)) == -1){
+					perror("open Fd fifo");
+					exit(EXIT_FAILURE);
+				}
+				write(Fd1, text, strlen(text)+1);
+				close(Fd1);
+				kill(getpid(), SIGKILL);
+			}
+			
+			else{
+				printf("pai: %d\n", getppid());
+				if((Fd2 = open(myfifo, O_RDONLY)) == -1){
+					perror("open Fd fifo");
+					exit(EXIT_FAILURE);
+				}
+				read(Fd2, message, sizeof message);
+				close(Fd2);
+			}
 			puts("Pesquisado\n");
 			break;
 
@@ -178,7 +214,7 @@ void *connection_handler(void *socket_desc)
 		default:
 			break;
 		}
-
+		
 		//Send the message back to client
 		write(sock , message , strlen(message));
 		memset(message, 0, TAM);
@@ -224,15 +260,15 @@ const char *searchPipe(char name[], char pesquisa[]){
     /* Processo filho. */
     if(pid) {
 		char buf[TAM];
-        char *hello;
+        char *text;
 		findFile(name, pesquisa, buf);
-		hello = buf;
+		text = buf;
         /* Operação obrigatória: fechar o descritor
          * desnecessário. */
         close(fd[0]) ;
 
         /* Escreve a mensagem no pipe. */
-        write(fd[1], hello, strlen(hello)+1) ;
+        write(fd[1], text, strlen(text)+1) ;
 
         close(fd[1]) ;
 		sleep(2);

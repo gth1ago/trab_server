@@ -119,7 +119,7 @@ void *connection_handler(void *socket_desc)
 		case 2:
 			//write(sock , "Ok" , strlen("Ok"));
 			findFile(name, preenche[2], message);
-			puts("pesquisado\n");
+			puts("Pesquisado\n");
 			break;
 		
 		case 3:
