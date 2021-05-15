@@ -108,7 +108,7 @@ int main(int argc , char *argv[])
 		
 		switch (opt){
 		case 1:
-			sprintf(message, "GET /%d /aloou", opt);
+			sprintf(message, "GET /%d", opt);
 			break;
 
 		case 2:

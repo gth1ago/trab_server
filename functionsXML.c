@@ -14,7 +14,7 @@ int insertEndFile(char name[], char new[]){
         return 1;
     }
 
-    fseek(fd, -11, SEEK_END);
+    fseek(fd, -13, SEEK_END);
     verf = fprintf(fd, "\t%s\n</streamings>", new);
     fclose(fd); 
     

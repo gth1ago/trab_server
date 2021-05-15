@@ -1,7 +1,21 @@
-#!/bin/bash
+all: gcc
+clear: clr
 
-gcc server.c -o server -lpthread -std=gnu99
-gcc client.c -o client
-echo "Para executar os client em outro terminal => ./client"
-echo "Iniciando servidor!"
-./server
+COMP   := gcc
+SERVER := server
+CLIENT := client
+EARG   := lpthread
+STD    := gnu99
+
+gcc:
+	@$(COMP) $(SERVER).c -o $(SERVER) -$(EARG) -std=$(STD)
+	@$(COMP) $(CLIENT).c -o $(CLIENT)
+	@echo -e '\nCompilado! "server" e "client" criados!'
+	@echo 'Use "./client" em outras abas'
+	@echo 'Inicinado servidor!'
+	@./$(SERVER)
+
+clr:
+	@echo 'Limpando'
+	rm server client
+	@echo 'Executados removidos!'
