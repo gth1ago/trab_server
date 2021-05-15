@@ -1,8 +1,13 @@
-# SO_trab1
+## Projeto 1 - S.O.
 
+### Universidade Estadual De Maringá
+
+### Disciplina:
+  * Sistemas Operacionais - Trab 1 - implementação
+  
 ### Discentes:
-  * RA:107774 - Gabriel T. H. Santos 
-  * RA:103069 - Thiago I. Yasunaka 
+  * RA: 107774 - Gabriel T. H. Santos 
+  * RA: 103069 - Thiago I. Yasunaka 
 
 ### Informações do projeto:
 Projeto possui o arquivo de servidor (server.c) e o do cliente (client.c), no qual realizam cadastro, listagem e busca de filmes.
