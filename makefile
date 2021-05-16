@@ -18,4 +18,4 @@ gcc:
 clr:
 	@echo 'Limpando'
 	rm server client
-	@echo 'Executados removidos!'
+	@echo 'Executaveis removidos!'
